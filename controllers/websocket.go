@@ -1,20 +1,17 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"websocket/game"
 	"websocket/services/httpservice"
-	"websocket/services/responseservice"
 	"websocket/services/websocketservice"
+
+	"github.com/google/uuid"
 )
 
 func WebsocketConn(writer http.ResponseWriter, request *http.Request) {
-	token, ok := httpservice.GetUrlQuery(game.WS_CONN_TOKEN_PARAM, request)
-	if !ok {
-		log.Println("getQuery fail", responseservice.GetResponse(responseservice.PARAMS_ERROR, nil))
-		return
-	}
+	token, _ := httpservice.GetUrlQuery("token", request)
 
 	validate := websocketservice.ValidateToken(token)
 
@@ -24,4 +21,8 @@ func WebsocketConn(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	websocketservice.WsUpgrade(writer, request, token)
+}
+
+func newToken() string {
+	return fmt.Sprintf("%s-%s","player-", uuid.New().String())
 }

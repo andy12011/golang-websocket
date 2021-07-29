@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 
 services:
   server:
@@ -9,6 +9,21 @@ services:
       - .:/golang-webosocket
     working_dir: /golang-webosocket
     ports:
-      - "8099:8099"
+      - '8099:8099'
     entrypoint: go run main.go
     restart: always
+    networks:
+      - backend
+  redis:
+    image: redis:latest
+    ports:
+      - 63099:63099
+    command: ["redis-server", "--appendonly", "no", "--requirepass", "123456", --port,  "63099"]
+    volumes:
+      - ~/storage/redis_data:/data
+    restart: always
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge
