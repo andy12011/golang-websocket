@@ -1,0 +1,14 @@
+version: "3.5"
+
+services:
+  server:
+    build:
+      context: ./docker/golang
+      dockerfile: Dockerfile
+    volumes:
+      - .:/golang-webosocket
+    working_dir: /golang-webosocket
+    ports:
+      - "8099:8099"
+    entrypoint: go run main.go
+    restart: always
