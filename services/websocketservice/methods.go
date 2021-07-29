@@ -1,10 +1,10 @@
 package websocketservice
 
 import (
-	"log"
 	"net/http"
-	"websocket/definitions"
+	"websocket/game"
 	"websocket/services/responseservice"
+	"websocket/utils"
 
 	"github.com/gorilla/websocket"
 )
@@ -21,19 +21,19 @@ func WsUpgrade(writer http.ResponseWriter, request *http.Request, token string) 
 	websocketConn, err := upgrader.Upgrade(writer, request, nil)
 
 	if err != nil {
-		log.Println("upgrade:", err)
+		utils.PrintWithTimeStamp(err.Error())
 		return
 	}
 
-	player := definitions.NewPlayer()
+	player := game.NewPlayer()
 	player.Conn = websocketConn
 	player.Token = token
 
 	player.AddToAllPlayer()
 
 	defer func() {
-		log.Println("disconnect !!")
-		definitions.RemoveFromAllPlayer(player.Token)
+		utils.PrintWithTimeStamp("disconnect !!")
+		game.RemoveFromAllPlayer(player.Token)
 		player.Conn.Close()
 	}()
 
@@ -43,7 +43,7 @@ func WsUpgrade(writer http.ResponseWriter, request *http.Request, token string) 
 		_, msg, err := player.Conn.ReadMessage()
 
 		if err != nil {
-			log.Println("read:", err)
+			utils.PrintWithTimeStamp(err.Error())
 			break
 		}
 

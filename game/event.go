@@ -1,4 +1,4 @@
-package definitions
+package game
 
 import (
 	"websocket/services/responseservice"
@@ -26,9 +26,9 @@ type ResponseMessage struct {
 }
 
 var eventHandler = map[string]func(player *Player, event *Event){
-	"createRoom":  eventCreateRoomHandler,
-	"enterRoom":   eventEnterRoomHandler,
-	"leaveRoom":   eventLeaveRoomHandler,
+	"createRoom":      eventCreateRoomHandler,
+	"enterRoom":       eventEnterRoomHandler,
+	"leaveRoom":       eventLeaveRoomHandler,
 	"sendRoomMessage": eventSendRoomMessageHandler,
 }
 
@@ -51,6 +51,10 @@ func eventCreateRoomHandler(player *Player, event *Event) {
 }
 
 func eventEnterRoomHandler(player *Player, event *Event) {
+	if player.IsInRoom() {
+		player.PushJson(responseservice.GetResponse(responseservice.PLAYER_IS_IN_ROOM, nil))
+		return
+	}
 
 	if data, ok := event.Data.(map[string]interface{}); ok {
 		if v, ok := data["room_uuid"]; !ok {
@@ -101,9 +105,13 @@ func eventSendRoomMessageHandler(player *Player, event *Event) {
 				player.PushJson(responseservice.GetResponse(responseservice.EVENT_ERROR, nil))
 				return
 			}
+
 			room, ok := GetRoom(player.RoomUUID)
 
-			room.Echo(player, msg)
+			if ok {
+				room.Echo(player, msg)
+			}
+
 			return
 		}
 	}

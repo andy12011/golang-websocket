@@ -1,7 +1,8 @@
-package definitions
+package game
 
 import (
 	"fmt"
+	"websocket/services/responseservice"
 	"websocket/utils"
 )
 
@@ -25,18 +26,38 @@ func NewWsConnetions() *ConnectRecord {
 	}
 }
 
-func AddToAllPlayer(ws *Player) {
+func AddToAllPlayer(player *Player) {
 	allConnectRecords.Mutex.Lock()
 	defer allConnectRecords.Mutex.Unlock()
-	allConnectRecords.Players[ws.Token] = ws
+
+	if prePlayer, ok := allConnectRecords.Players[player.Token]; ok { //reconnection
+		prePlayer.Mutex.Lock()
+		defer prePlayer.Mutex.Unlock()
+
+		prePlayer.PushJson(responseservice.GetResponse(responseservice.PLAYER_IS_CONNETION_ELSEWHERE, nil))
+
+		newConn := player.Conn
+		player.CopyPlayer(prePlayer)
+		player.Conn = newConn
+		player.IsReconnect = true
+		prePlayer.Conn.Close()
+	}
+
+	allConnectRecords.Players[player.Token] = player
 }
 
 func RemoveFromAllPlayer(token string) {
 	allConnectRecords.Mutex.Lock()
 	defer allConnectRecords.Mutex.Unlock()
 
-	_, ok := allConnectRecords.Players[token]
-	if ok {
+	player, ok := allConnectRecords.Players[token]
+	if player.IsReconnect {
+		player.IsReconnect = false
+		return
+	}
+
+	if ok && !player.IsPlaying {
+		player.LeaveRoom()
 		delete(allConnectRecords.Players, token)
 	}
 }
@@ -76,18 +97,18 @@ func CloseRoom(room *Room) {
 }
 
 func ShowAllRoomInfo() {
-	utils.PrintWithTimeStamp(fmt.Sprintf("目前開啟房間數量: %d\n", len(AllRoom.Rooms)))
+	utils.PrintWithTimeStamp(fmt.Sprintf("目前開啟房間數量: %d", len(AllRoom.Rooms)))
 
 	for _, room := range AllRoom.Rooms {
-		msg := fmt.Sprintf("房間編號: %s 玩家人數: %d\n", room.GetRoomUUID(), len(room.ConnectRecord.Players))
+		msg := fmt.Sprintf("房間編號: %s 玩家人數: %d", room.GetRoomUUID(), len(room.ConnectRecord.Players))
 		utils.PrintWithTimeStamp(msg)
 
 		for _, player := range room.ConnectRecord.Players {
 			var msg string
 			if player.Token == room.Owner.Token {
-				msg = fmt.Sprintf("房間編號: %s 房長玩家:%s\n", room.GetRoomUUID(), player.Token)
+				msg = fmt.Sprintf("房間編號: %s 房長玩家:%s", room.GetRoomUUID(), player.Token)
 			} else {
-				msg = fmt.Sprintf("房間編號: %s 玩家:%s\n", room.GetRoomUUID(), player.Token)
+				msg = fmt.Sprintf("房間編號: %s 玩家:%s", room.GetRoomUUID(), player.Token)
 			}
 			utils.PrintWithTimeStamp(msg)
 		}

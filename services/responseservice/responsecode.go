@@ -10,8 +10,9 @@ const (
 	SUCCESS             = 20001
 	CREATE_ROOM_SUCCESS = 20002
 
-	PLAYER_IS_NOT_IN_ROOM = 41001
-	PLAYER_IS_IN_ROOM     = 41002
+	PLAYER_IS_NOT_IN_ROOM         = 41001
+	PLAYER_IS_IN_ROOM             = 41002
+	PLAYER_IS_CONNETION_ELSEWHERE = 41003
 
 	ROOM_UUID_ERROR     = 41201
 	ROOM_UUID_KEY_ERROR = 41202
@@ -30,6 +31,7 @@ var messages = map[int]string{
 	ROOM_UUID_ERROR:     "Not fount room num.",
 	ROOM_UUID_KEY_ERROR: "Not fount correct key.",
 
-	PLAYER_IS_NOT_IN_ROOM: "Player is not in any room.",
-	PLAYER_IS_IN_ROOM:     "Player is in a room.",
+	PLAYER_IS_NOT_IN_ROOM:         "Player is not in any room.",
+	PLAYER_IS_IN_ROOM:             "Player is in a room.",
+	PLAYER_IS_CONNETION_ELSEWHERE: "Player is connection from elsewhere.",
 }

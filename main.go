@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"websocket/definitions"
+	"websocket/game"
 	"websocket/routes"
 	"websocket/utils"
 )
@@ -20,9 +20,9 @@ func main() {
 
 func showCurrentPlayerCount() {
 	for {
-		msg := fmt.Sprintf("線上玩家數量: %d\n", definitions.GetOnlinePlayerCount())
+		msg := fmt.Sprintf("線上玩家數量: %d", game.GetOnlinePlayerCount())
 		utils.PrintWithTimeStamp(msg)
-		definitions.ShowAllRoomInfo()
+		game.ShowAllRoomInfo()
 		time.Sleep(4 * time.Second)
 	}
 }

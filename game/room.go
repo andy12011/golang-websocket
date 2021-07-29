@@ -1,4 +1,4 @@
-package definitions
+package game
 
 import (
 	"sync"
@@ -80,8 +80,8 @@ func (room *Room) PlayerLeave(player *Player) {
 func (room *Room) Echo(sender *Player, msg string) {
 	sendMsg := &ResponseMessage{
 		CreatedAt: utils.GetDateTimeString(),
-		Msg: msg,
-		Sender: sender.Name ,
+		Msg:       msg,
+		Sender:    sender.Name,
 	}
 	for _, player := range room.ConnectRecord.Players {
 		player.PushJson(responseservice.GetResponse(responseservice.SUCCESS, sendMsg))

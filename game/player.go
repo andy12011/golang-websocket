@@ -1,4 +1,4 @@
-package definitions
+package game
 
 import (
 	"encoding/json"
@@ -10,14 +10,15 @@ import (
 )
 
 type Player struct {
-	Name      string
-	Token     string
-	Conn      *websocket.Conn
-	RoomUUID  string
-	Position  int
-	Character string
-	IsPlaying bool
-	Mutex     sync.Mutex
+	Name        string
+	Token       string
+	Conn        *websocket.Conn
+	RoomUUID    string
+	Position    int
+	Character   string
+	IsPlaying   bool
+	IsReconnect bool
+	Mutex       sync.Mutex
 }
 
 func (player *Player) AddToAllPlayer() {
@@ -92,4 +93,15 @@ func (player *Player) SetPlayerRoomUUID(uuid string) {
 
 func (player *Player) IsInRoom() bool {
 	return player.RoomUUID != ""
+}
+
+func (player *Player) CopyPlayer(target *Player) {
+	player.Name = target.Name
+	player.Token = target.Token
+	player.Conn = target.Conn
+	player.RoomUUID = target.RoomUUID
+	player.Position = target.Position
+	player.Character = target.Character
+	player.IsPlaying = target.IsPlaying
+	player.IsReconnect = target.IsReconnect
 }

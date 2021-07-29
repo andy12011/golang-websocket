@@ -11,5 +11,5 @@ func GetDateTimeString() string {
 }
 
 func PrintWithTimeStamp(msg string) {
-	fmt.Printf("[%s] %s", GetDateTimeString(), msg)
+	fmt.Printf("[%s] %s\n", GetDateTimeString(), msg)
 }
