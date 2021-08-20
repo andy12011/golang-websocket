@@ -22,17 +22,13 @@ func NewRoom() *Room {
 
 func NewWsConnetions() *ConnectRecord {
 	return &ConnectRecord{
-		Players: make(map[string]*Player),
 	}
 }
 
 func AddToAllPlayer(player *Player) {
-	allConnectRecords.Mutex.Lock()
-	defer allConnectRecords.Mutex.Unlock()
 
-	if prePlayer, ok := allConnectRecords.Players[player.Token]; ok { //reconnection
-		prePlayer.Mutex.Lock()
-		defer prePlayer.Mutex.Unlock()
+	if val, ok := allConnectRecords.Players.Load(player.Token); ok { //reconnection
+		prePlayer, _ := val.(*Player);
 
 		prePlayer.PushJson(responseservice.GetResponse(responseservice.PLAYER_IS_CONNETION_ELSEWHERE, nil))
 
@@ -43,30 +39,30 @@ func AddToAllPlayer(player *Player) {
 		prePlayer.Conn.Close()
 	}
 
-	allConnectRecords.Players[player.Token] = player
+	allConnectRecords.Players.Store(player.Token, player)
 }
 
 func RemoveFromAllPlayer(token string) {
-	allConnectRecords.Mutex.Lock()
-	defer allConnectRecords.Mutex.Unlock()
 
-	player, ok := allConnectRecords.Players[token]
+	val, ok := allConnectRecords.Players.Load(token)
+
+	if !ok {
+		return
+	}
+
+	player, _ := val.(*Player);
+
 	if player.IsReconnect {
 		player.IsReconnect = false
 		return
 	}
 
-	if ok && !player.IsPlaying {
-		player.LeaveRoom()
-		delete(allConnectRecords.Players, token)
-	}
+	player.LeaveRoom()
+	allConnectRecords.Players.Delete(player.Token)
 }
 
 func GetOnlinePlayerCount() int {
-	allConnectRecords.Mutex.Lock()
-	defer allConnectRecords.Mutex.Unlock()
-
-	return len(allConnectRecords.Players)
+	return utils.GetSyncMapLen(allConnectRecords.Players)
 }
 
 func GetRoomCount() int {
@@ -100,17 +96,20 @@ func ShowAllRoomInfo() {
 	utils.PrintWithTimeStamp(fmt.Sprintf("目前開啟房間數量: %d", len(AllRoom.Rooms)))
 
 	for _, room := range AllRoom.Rooms {
-		msg := fmt.Sprintf("房間編號: %s 玩家人數: %d", room.GetRoomUUID(), len(room.ConnectRecord.Players))
+		msg := fmt.Sprintf("房間編號: %s 玩家人數: %d", room.GetRoomUUID(), utils.GetSyncMapLen(room.ConnectRecord.Players))
 		utils.PrintWithTimeStamp(msg)
 
-		for _, player := range room.ConnectRecord.Players {
+		allConnectRecords.Players.Range(func(key, value interface{}) bool {
+			player, _ := value.(*Player);
 			var msg string
+
 			if player.Token == room.Owner.Token {
 				msg = fmt.Sprintf("房間編號: %s 房長玩家:%s", room.GetRoomUUID(), player.Token)
 			} else {
 				msg = fmt.Sprintf("房間編號: %s 玩家:%s", room.GetRoomUUID(), player.Token)
 			}
 			utils.PrintWithTimeStamp(msg)
-		}
+			return true
+		})
 	}
 }

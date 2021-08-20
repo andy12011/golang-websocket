@@ -7,7 +7,6 @@ import (
 	"websocket/config"
 	"websocket/database/redis"
 	"websocket/game"
-	"websocket/oauth2/google"
 	"websocket/routes"
 	"websocket/utils"
 )
@@ -15,7 +14,6 @@ import (
 func main() {
 
 	config.Init(".env")
-	google.Init()
 	routes.Init()
 	redis.Connection()
 

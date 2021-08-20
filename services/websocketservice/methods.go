@@ -9,16 +9,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func ValidateToken(token string) bool {
-	return true
-}
-
-func WsUpgrade(writer http.ResponseWriter, request *http.Request, token string) {
+func WsUpgrade(writer *http.ResponseWriter, request *http.Request, token string, nickname string) {
 	upgrader := &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
 
-	websocketConn, err := upgrader.Upgrade(writer, request, nil)
+	websocketConn, err := upgrader.Upgrade(*writer, request, nil)
 
 	if err != nil {
 		utils.PrintWithTimeStamp(err.Error())
@@ -28,6 +24,7 @@ func WsUpgrade(writer http.ResponseWriter, request *http.Request, token string) 
 	player := game.NewPlayer()
 	player.Conn = websocketConn
 	player.Token = token
+	player.Nickname = nickname
 
 	player.AddToAllPlayer()
 

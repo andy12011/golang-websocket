@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"websocket/services/httpservice"
 	"websocket/services/websocketservice"
@@ -11,18 +10,19 @@ import (
 )
 
 func WebsocketConn(writer http.ResponseWriter, request *http.Request) {
-	token, _ := httpservice.GetUrlQuery("token", request)
+	nickname, _ := httpservice.GetUrlQuery("nickname", request)
 
-	validate := websocketservice.ValidateToken(token)
+	authCookie, hasAuthCookie := httpservice.GetAuthCookie(request)
 
-	if !validate {
-		log.Println("validateToken fail")
-		return
+	if !hasAuthCookie {
+		cookie := httpservice.NewAuthCookie()
+		authCookie = cookie.Value
+		http.SetCookie(writer, cookie)
 	}
 
-	websocketservice.WsUpgrade(writer, request, token)
+	websocketservice.WsUpgrade(&writer, request, authCookie, nickname)
 }
 
 func newToken() string {
-	return fmt.Sprintf("%s-%s","player-", uuid.New().String())
+	return fmt.Sprintf("%s-%s", "player-", uuid.New().String())
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type Player struct {
-	Name        string
+	Nickname    string
 	Token       string
 	Conn        *websocket.Conn
 	RoomUUID    string
@@ -96,7 +96,7 @@ func (player *Player) IsInRoom() bool {
 }
 
 func (player *Player) CopyPlayer(target *Player) {
-	player.Name = target.Name
+	player.Nickname = target.Nickname
 	player.Token = target.Token
 	player.Conn = target.Conn
 	player.RoomUUID = target.RoomUUID

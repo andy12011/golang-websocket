@@ -52,25 +52,26 @@ func (room *Room) PlayerEnter(player *Player) {
 	defer room.ConnectRecord.Mutex.Unlock()
 
 	player.SetPlayerRoomUUID(room.GetRoomUUID())
-	room.ConnectRecord.Players[player.Token] = player
+	room.ConnectRecord.Players.Store(player.Token, player)
 }
 
 func (room *Room) PlayerLeave(player *Player) {
 	room.ConnectRecord.Mutex.Lock()
 	defer room.ConnectRecord.Mutex.Unlock()
 
-	_, ok := room.ConnectRecord.Players[player.Token]
+	_, ok := room.ConnectRecord.Players.Load(player.Token)
 
 	if ok {
-		delete(room.ConnectRecord.Players, player.Token)
+		room.ConnectRecord.Players.Delete(player.Token)
 
-		if len(room.ConnectRecord.Players) == 0 {
+		if utils.GetSyncMapLen(room.ConnectRecord.Players) == 0 {
 			CloseRoom(room)
 		} else if player.Token == room.Owner.Token {
-			for _, newOwner := range room.ConnectRecord.Players {
+			room.ConnectRecord.Players.Range(func(key, value interface{}) bool {
+				newOwner :=value.(*Player)
 				room.Owner = newOwner
-				break
-			}
+				return false
+			})
 		}
 	}
 
@@ -81,9 +82,12 @@ func (room *Room) Echo(sender *Player, msg string) {
 	sendMsg := &ResponseMessage{
 		CreatedAt: utils.GetDateTimeString(),
 		Msg:       msg,
-		Sender:    sender.Name,
+		Sender:    sender.Nickname,
 	}
-	for _, player := range room.ConnectRecord.Players {
+
+	room.ConnectRecord.Players.Range(func(key, value interface{}) bool {
+		player := value.(*Player)
 		player.PushJson(responseservice.GetResponse(responseservice.SUCCESS, sendMsg))
-	}
+		return true
+	})
 }

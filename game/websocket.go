@@ -11,12 +11,11 @@ const (
 
 var allConnectRecords = &ConnectRecord{
 	ID:      "All",
-	Players: make(map[string]*Player),
 }
 
 type ConnectRecord struct {
 	ID      string
-	Players map[string]*Player
+	Players sync.Map
 	Mutex   sync.Mutex
 }
 

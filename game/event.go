@@ -5,9 +5,10 @@ import (
 )
 
 const (
-	CREATE_ROOM_EVENT = "createRoom"
-	ENTER_ROOM_EVENT  = "enterRoom"
-	LEAVE_ROOM_EVENT  = "leaveRoom"
+	CREATE_ROOM_EVENT          = "createRoom"
+	ENTER_ROOM_EVENT           = "enterRoom"
+	LEAVE_ROOM_EVENT           = "leaveRoom"
+	SEND_MESSAGE_TO_ROOM_EVENT = "sendRoomMessage"
 )
 
 type Event struct {
@@ -26,10 +27,10 @@ type ResponseMessage struct {
 }
 
 var eventHandler = map[string]func(player *Player, event *Event){
-	"createRoom":      eventCreateRoomHandler,
-	"enterRoom":       eventEnterRoomHandler,
-	"leaveRoom":       eventLeaveRoomHandler,
-	"sendRoomMessage": eventSendRoomMessageHandler,
+	CREATE_ROOM_EVENT:          eventCreateRoomHandler,
+	ENTER_ROOM_EVENT:           eventEnterRoomHandler,
+	LEAVE_ROOM_EVENT:           eventLeaveRoomHandler,
+	SEND_MESSAGE_TO_ROOM_EVENT: eventSendRoomMessageHandler,
 }
 
 func getEventHandler(eventType string) (func(player *Player, event *Event), bool) {
