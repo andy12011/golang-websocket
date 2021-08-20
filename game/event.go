@@ -24,6 +24,7 @@ type ResponseMessage struct {
 	CreatedAt string `json:"created_at" binding:"required"`
 	Msg       string `json:"msg" binding:"required"`
 	Sender    string `json:"sender" binding:"required"`
+	Nickname  string `json:"nickname" binding:"required"`
 }
 
 var eventHandler = map[string]func(player *Player, event *Event){

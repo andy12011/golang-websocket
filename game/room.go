@@ -68,7 +68,7 @@ func (room *Room) PlayerLeave(player *Player) {
 			CloseRoom(room)
 		} else if player.Token == room.Owner.Token {
 			room.ConnectRecord.Players.Range(func(key, value interface{}) bool {
-				newOwner :=value.(*Player)
+				newOwner := value.(*Player)
 				room.Owner = newOwner
 				return false
 			})
@@ -82,7 +82,8 @@ func (room *Room) Echo(sender *Player, msg string) {
 	sendMsg := &ResponseMessage{
 		CreatedAt: utils.GetDateTimeString(),
 		Msg:       msg,
-		Sender:    sender.Nickname,
+		Sender:    sender.Token,
+		Nickname:  sender.Nickname,
 	}
 
 	room.ConnectRecord.Players.Range(func(key, value interface{}) bool {

@@ -21,14 +21,13 @@ func NewRoom() *Room {
 }
 
 func NewWsConnetions() *ConnectRecord {
-	return &ConnectRecord{
-	}
+	return &ConnectRecord{}
 }
 
 func AddToAllPlayer(player *Player) {
 
 	if val, ok := allConnectRecords.Players.Load(player.Token); ok { //reconnection
-		prePlayer, _ := val.(*Player);
+		prePlayer, _ := val.(*Player)
 
 		prePlayer.PushJson(responseservice.GetResponse(responseservice.PLAYER_IS_CONNETION_ELSEWHERE, nil))
 
@@ -50,7 +49,7 @@ func RemoveFromAllPlayer(token string) {
 		return
 	}
 
-	player, _ := val.(*Player);
+	player, _ := val.(*Player)
 
 	if player.IsReconnect {
 		player.IsReconnect = false
@@ -100,13 +99,13 @@ func ShowAllRoomInfo() {
 		utils.PrintWithTimeStamp(msg)
 
 		allConnectRecords.Players.Range(func(key, value interface{}) bool {
-			player, _ := value.(*Player);
+			player, _ := value.(*Player)
 			var msg string
 
 			if player.Token == room.Owner.Token {
-				msg = fmt.Sprintf("房間編號: %s 房長玩家:%s", room.GetRoomUUID(), player.Token)
+				msg = fmt.Sprintf("房間編號: %s 房長玩家: %s Token: %s", room.GetRoomUUID(), player.Nickname, player.Token)
 			} else {
-				msg = fmt.Sprintf("房間編號: %s 玩家:%s", room.GetRoomUUID(), player.Token)
+				msg = fmt.Sprintf("房間編號: %s 玩家: %s Token: %s", room.GetRoomUUID(), player.Nickname, player.Token)
 			}
 			utils.PrintWithTimeStamp(msg)
 			return true
